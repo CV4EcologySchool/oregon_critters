@@ -7,7 +7,7 @@ from tqdm import tqdm
 # Specify the source and target base directories
 #source_base_directory = "/home/cara/oregon_critters/yolo_txt/labels"
 #target_base_directory = "/mnt/ssd-cluster/cara"
-source_base_directory = '/mnt/ssd-cluster/cara'
+source_base_directory = '/mnt/ssd-cluster/cara/upload_ground_thresh620'
 #target_base_directory = '/mnt/ssd-cluster/cara'
 
 def transform_path(source_path):
@@ -18,8 +18,6 @@ def transform_path(source_path):
 
 for root, _, files in os.walk(source_base_directory):
     for file in tqdm(files):
-        # print(root)
-        # print(file)
 
         if file.endswith(".txt") and '/images' in root:
             source_file_path = os.path.join(root, file)
@@ -27,7 +25,7 @@ for root, _, files in os.walk(source_base_directory):
 
             # print(source_file_path)
             # print(target_file_path)
-            # print( )
+            # print()
 
             #Does target directory exist?
             # target_directory = os.path.dirname(target_file_path)
