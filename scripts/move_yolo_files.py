@@ -7,7 +7,8 @@ from tqdm import tqdm
 # Specify the source and target base directories
 #source_base_directory = "/home/cara/oregon_critters/yolo_txt/labels"
 #target_base_directory = "/mnt/ssd-cluster/cara"
-source_base_directory = '/mnt/ssd-cluster/cara/upload_ground_thresh620'
+#source_base_directory = '/mnt/ssd-cluster/cara/upload_ground_thresh620'
+source_base_directory = '/mnt/ssd-cluster/cara/upload_trail_thresh180'
 #target_base_directory = '/mnt/ssd-cluster/cara'
 
 def transform_path(source_path):
@@ -23,15 +24,13 @@ for root, _, files in os.walk(source_base_directory):
             source_file_path = os.path.join(root, file)
             target_file_path = transform_path(source_file_path)
 
-            # print(source_file_path)
-            # print(target_file_path)
-            # print()
-
             #Does target directory exist?
-            # target_directory = os.path.dirname(target_file_path)
-            # if not os.path.exists(target_directory):
-            #     raise ValueError(f"Target directory '{target_directory}' does not exist.")
-
+            target_directory = os.path.dirname(target_file_path)
+            if not os.path.exists(target_directory):
+                print(f"Creating target directory: '{target_directory}'")
+                os.makedirs(target_directory)  
+            
+            #Move files
             shutil.move(source_file_path, target_file_path)
 
 

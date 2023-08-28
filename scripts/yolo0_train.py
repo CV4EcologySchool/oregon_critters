@@ -2,4 +2,4 @@
 
 import ultralytics
 
-yolo detect train data=dataset_ground.yaml model=yolov8n.pt epochs=100 imgsz=640
+#yolo detect train data=dataset_ground.yaml model=yolov8n.pt epochs=100 imgsz=640 name=3_mc_ground
