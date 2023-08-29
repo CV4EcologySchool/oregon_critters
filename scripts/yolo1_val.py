@@ -10,7 +10,7 @@ wandb.init(project='yolo_0_val')
 model = YOLO('/home/cara/oregon_critters/runs/detect/train15/weights/best.pt')
 
 #Validate the model
-metrics = model.val(data=dataset.yaml, save_json=True)  # no arguments needed, dataset and settings remembered
+metrics = model.val(save_json=True)  # no arguments needed, dataset and settings remembered
 metrics.box.map    # map50-95
 metrics.box.map50  # map50
 metrics.box.map75  # map75

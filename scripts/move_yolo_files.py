@@ -8,7 +8,8 @@ from tqdm import tqdm
 #source_base_directory = "/home/cara/oregon_critters/yolo_txt/labels"
 #target_base_directory = "/mnt/ssd-cluster/cara"
 #source_base_directory = '/mnt/ssd-cluster/cara/upload_ground_thresh620'
-source_base_directory = '/mnt/ssd-cluster/cara/upload_trail_thresh180'
+#source_base_directory = '/mnt/ssd-cluster/cara/upload_trail_thresh180'
+source_base_directory = '/mnt/ssd-cluster/cara/bothB/inputs'
 #target_base_directory = '/mnt/ssd-cluster/cara'
 
 def transform_path(source_path):
