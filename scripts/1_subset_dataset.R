@@ -165,6 +165,9 @@ library(ggplot2)
       
   #5. Add subsampled species images back to the rest of the images
   ds_rest <- ds[!(ds$CName %in% sp_thresh),]
+  
+  ds_rest
+  
   ds_thresh <- bind_rows(ds_rest, ds_sp_thresh)
     nrow(ds_thresh)    
     length(unique(ds_thresh$full_path_new)) #why did we lose 43?
@@ -174,7 +177,7 @@ library(ggplot2)
     b <- (unique(ds_rest$full_path_new)) ; length(b) #not common species
     c <- (unique(ds_thresh$full_path_new)) ; length(c) #combined (why isn't it a + b)
     
-      sum(a %in% b) ; sum(b %in% a) #shold be 0 but is 43
+      sum(a %in% b) ; sum(b %in% a) #should be 0 but is 43
       sum (a %in% c) ; sum (c %in% a) #good
       sum (b %in% c) #good
       
@@ -183,8 +186,8 @@ library(ggplot2)
       View(ds[ds$full_path_new %in% a[a %in% b],])
       
       #ooooh, they are images with multiple species (common + not common)
-      #how to handle them?
-    #  
+      #proceed... they aren't that important and I think we actually have them?
+      # we just didn't originally have as many as we thought
     
   #How did we do?
     sort(table(ds_thresh$CName))
