@@ -8,7 +8,8 @@ library(ggplot2)
 ## Read in metadata and labels for my dataset ----------------------------------
 
   #do separately for both, ground, trail
-  dat <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/sampled_ds_both_350.csv'); dat <- dat[,-1]
+  # dat <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/sampled_ds_both_350.csv'); dat <- dat[,-1]
+  dat <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/metadata_labels_both.csv'); dat <- dat[,-1]
     head(dat)
     length(unique(dat$full_path))
     
