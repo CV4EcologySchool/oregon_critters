@@ -225,6 +225,8 @@ library(ggplot2)
   write.table(dat_groups[dat_groups$group %in% 'test',]$full_path, col.names = FALSE, row.names = FALSE,
               file = '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_test.txt')
   
+  # **need to remove quotations from these .txt files!!!!**
+  
   
 ## TRAIL BATCH  ---------------------------------------------------------------
   
@@ -428,6 +430,7 @@ library(ggplot2)
   write.table(dat_groups[dat_groups$group %in% 'test',]$full_path, col.names = FALSE, row.names = FALSE,
               file = '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_test.txt')
   
+  # **need to remove quotations from these .txt files!!!!**
   
 ## BOTH COMBINED ---------------------------------------------------------------
   
@@ -507,11 +510,11 @@ library(ggplot2)
   
   
   #save txt files with just filenames
-  write.table(dat_groups[dat_groups$group %in% 'train',]$full_path_new, col.names = FALSE, row.names = FALSE,
+  write.table(dat_groups[dat_groups$group %in% 'train',]$full_path, col.names = FALSE, row.names = FALSE,
               file = '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_train.txt')
-  write.table(dat_groups[dat_groups$group %in% 'val',]$full_path_new, col.names = FALSE, row.names = FALSE,
+  write.table(dat_groups[dat_groups$group %in% 'val',]$full_path, col.names = FALSE, row.names = FALSE,
               file = '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_val.txt')
-  write.table(dat_groups[dat_groups$group %in% 'test',]$full_path_new, col.names = FALSE, row.names = FALSE,
+  write.table(dat_groups[dat_groups$group %in% 'test',]$full_path, col.names = FALSE, row.names = FALSE,
               file = '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_test.txt')
   
-  
+  # **need to remove quotations from these .txt files!!!!**

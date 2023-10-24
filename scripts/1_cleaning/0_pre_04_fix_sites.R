@@ -147,7 +147,7 @@ library(tidyverse)
     meta$dunes_site <- ifelse(meta$dunes_site == 'IMG', 'DUNE10A', meta$dunes_site)
     
     #add ones I matched manually
-    dunes_sites <- fread('/Users/caraappel/Desktop/dunes_meta_tmp.csv')
+    dunes_sites <- fread('/Users/caraappel/Documents/_RESEARCH/YOLO/COA_training/dunes_meta_tmp.csv')
     meta$dunes_site_manual <- dunes_sites$site_manual[match(meta$full_name, dunes_sites$full_name)]
     meta$dunes_site_manual <- ifelse(meta$dunes_site_manual == '', NA, meta$dunes_site_manual)
     
