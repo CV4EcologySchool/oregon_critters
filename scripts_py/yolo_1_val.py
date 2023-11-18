@@ -10,6 +10,7 @@ def parse_args():
     #set required (positional) arguments
     parser.add_argument("model", type=str, help="Path and name to pretrained model")
     parser.add_argument("data", type=str, help="Path and name of dataset.yaml file")
+    parser.add_argument("name", type=str, help="Provide a name for the model run")
    
     #set optional arguments and their defaults
     parser.add_argument("--imgsz", type=int, default=640, help="Image dimensions, e.g., 320 or 640")
@@ -22,7 +23,11 @@ def main():
     args = parse_args()
 
     #start wandb run
-    wandb.init(project = 'test_name')
+    wandb.init(entity = 'oregon-critters',
+	       project = 'demo_val',
+               name = args.name,
+               save_code = True,
+               job_type = 'val')
 
     #load my model
     model = YOLO(args.model)  #e.g., runs/detect/7_mc_ground_med/weights/best.pt
