@@ -176,6 +176,7 @@ library(ggplot2)
     dat_groups %>% group_by(group) %>% summarise('percentage' = n_distinct(full_path) / n_distinct(dat_groups$full_path) * 100)
       #70/15/15 after rounding!
   
+    
   ## 3. Plot
     
     #sort levels for plotting

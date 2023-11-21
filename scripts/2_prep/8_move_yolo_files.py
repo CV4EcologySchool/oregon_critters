@@ -5,7 +5,7 @@ import shutil
 from tqdm import tqdm
 
 # Specify the location of images and labels
-source_base_directory = '/Volumes/Cara_cam_traps/CV4E/data_cleaned/ground/'
+source_base_directory = '/Volumes/Cara_cam_traps/CV4E/data_cleaned/demo2/'
 
 ############
 

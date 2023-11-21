@@ -43,7 +43,7 @@ library(tidyverse)
     bb$model <- '09_mc_both_med'; bb$val_set <- 'both'
       head(bb)  
       
-  #combine into long-form det hist
+  #combine into long-form 
     df_list <- list(gg, tt, bg, bt, bb)
     val_results <- rbindlist(df_list)  
       head(val_results)    
@@ -63,7 +63,7 @@ library(tidyverse)
             axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
             legend.position = 'none')
     p0  
-    ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_all.png', units="in", width=7, height=5, dpi=600, bg = 'transparent')
+    #ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_all.png', units="in", width=7, height=5, dpi=600, bg = 'transparent')
     
     
         
@@ -93,7 +93,7 @@ library(tidyverse)
             legend.position = 'none',
             plot.margin = margin(0.5,0.5,0.5,2, "cm"))
     p1  
-    ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_ground_vs_both_sp.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
+    #ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_ground_vs_both_sp.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
     
     
     #trail vs. both
@@ -115,7 +115,8 @@ library(tidyverse)
             legend.position = 'none',
             plot.margin = margin(0.5,0.5,0.5,0.5, "cm"))
     p2  
-    ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_trail_vs_both_sp.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
+    #ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_trail_vs_both_sp.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
+    
     
     
 ## PLOT DIFF IN mAP RELATED TO TRAINING SIZE -----------------------------------
@@ -143,13 +144,13 @@ library(tidyverse)
     .id = "type"  # Creates a 'type' column to distinguish between the sources
   ) %>%
     mutate(type = ifelse(type == "1", "ground", "trail")) %>% # Rename type values
-    mutate(appearance = ifelse("ground" %in% type & "trail" %in% type, "both", "ground"))
+    mutate(appearance = ifelse("ground" %in% type & "trail" %in% type, "both", type))
   
   #
   g0 <- ggplot(combined_df[!combined_df$Class %in% 'all',], aes(x = reorder(Class, -score_diff), y = score_diff, fill = type)) +
     geom_bar(stat = 'identity', position = position_dodge2(width = 0.9, preserve = "single")) +
     theme_bw() +
-    facet_grid(~trail) +
+#    facet_grid(~appearance) +
     ylim(-1,1) +
     scale_fill_manual(values = c('#D6705C','#2A90CB')) +
     ylab('Difference in mAP50 from combined model') +
@@ -160,13 +161,13 @@ library(tidyverse)
           legend.position = 'none',
           plot.margin = margin(0.5,0.5,0.5,0.5, "cm"))
   g0
-  ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_diff_by_species.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
+  #ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/mAP_diff_by_species.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
   
 
   ## Read in training size
-  groundcsv <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/sampled_ds_ground_620_split.csv'); groundcsv <- groundcsv[,-1]
-  trailcsv <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/sampled_ds_trail_180_split.csv'); trailcsv <- trailcsv[,-1]
-  bothcsv <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/sampled_ds_bothB_split.csv'); bothcsv <- bothcsv[,-1]
+  groundcsv <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels_old/sampled_ds_ground_620_split.csv'); groundcsv <- groundcsv[,-1]
+  trailcsv <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels_old/sampled_ds_trail_180_split.csv'); trailcsv <- trailcsv[,-1]
+  bothcsv <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels_old/sampled_ds_bothB_split.csv'); bothcsv <- bothcsv[,-1]
   
   ground_split <- groundcsv %>% group_by(CName, group) %>% summarise(total = n()) %>%
     group_by(group) %>% mutate(percentage = (total / sum(total)) * 100)
@@ -225,8 +226,51 @@ library(tidyverse)
           legend.position = 'none',
           plot.margin = margin(0.5,0.5,0.5,0.5, "cm"))
   g0c
-  ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/training_by_species.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
+  #ggsave('/Users/caraappel/Documents/CV4E/oregon_critters/figures/training_by_species.png', units="in", width=14, height=5, dpi=600, bg = 'transparent')
   
+  
+## TO REPORT FOR ORTWS ABSTRACT ------------------------------------------------
+  head(ground_results)
+  head(trail_results)
+  head(ground_split); head(trail_split); head(both_split)
+  
+  #summary of mAP50
+  summary(ground_results$mAP50) #range 0-0.995, mean 0.5623
+  summary(trail_results$mAP50) #range 0-0.995, mean 0.5566
+  
+  #match training data sizes
+  ground_ground_df <- merge(ground_results[ground_results$model == '07_mc_ground_med'], 
+                     ground_split[ground_split$group == 'train',], by.x = 'Class', by.y = 'CName', all = TRUE)
+  ground_both_df <- merge(ground_results[ground_results$model == '09_mc_both_med'], 
+                     both_split[both_split$group == 'train',], by.x = 'Class', by.y = 'CName', all = TRUE)
+  ground_df <- rbind(ground_ground_df, ground_both_df)
+  
+  trail_trail_df <- merge(trail_results[trail_results$model == '08_mc_trail_med'], 
+                    trail_split[trail_split$group == 'train',], by.x = 'Class', by.y = 'CName', all = TRUE)
+  trail_both_df <- merge(trail_results[trail_results$model == '09_mc_both_med'], 
+                    both_split[both_split$group == 'train',], by.x = 'Class', by.y = 'CName', all = TRUE)
+  trail_df <- rbind(trail_trail_df, trail_both_df)
+  
+  #for each species, keep the highest mAP50 of the 3 model replicates
+  ground_max <- ground_df %>% group_by(Class, model) %>% filter(mAP50 == max(mAP50))
+  trail_max <- trail_df %>% group_by(Class, model) %>% filter(mAP50 == max(mAP50))
+  
+  #plot training size against mAP50
+  plot(ground_max$mAP50 ~ ground_max$total)
+  
+  ggplot(ground_max, aes(x = total, y = mAP50, color = Class)) +
+    geom_point(size = 2) +
+    geom_text(aes(label = Class), hjust = 1.2, vjust = 0.5) +
+    theme_bw() + 
+    facet_grid(~model) +
+    theme(legend.position = 'none')
+  
+  ggplot(trail_max, aes(x = total, y = mAP50, color = Class)) +
+    geom_point(size = 2) +
+    geom_text(aes(label = Class), hjust = 1.2, vjust = 0.5) +
+    theme_bw() + 
+    facet_grid(~model) +
+    theme(legend.position = 'none')
   
   
 ## PLOT HISTOGRAMS OF CONFIDENCE SCORES ----------------------------------------
