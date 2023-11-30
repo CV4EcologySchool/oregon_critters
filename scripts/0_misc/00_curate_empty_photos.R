@@ -202,15 +202,16 @@ library(tidyverse)
     #             file = '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_test_esfground.txt')
 
             
+## Now run '4_extract_image_dimensions.ipynb' with each csv as input    
     
 ## Combine empties from all projects -------------------------------------------    
     
-    empty_dunes     <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_dunes.csv')
-    empty_esfbait   <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esfbait.csv')
-    empty_esfground <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esfground.csv')
-    empty_esftrail  <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esftrail.csv')
+    empty_dunes     <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_dunes_dim.csv')
+    empty_esfbait   <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esfbait_dim.csv')
+    empty_esfground <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esfground_dim.csv')
+    empty_esftrail  <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esftrail_dim.csv')
     empty_coa2019
-    empty_coa2020
+    empty_coa2020 <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_COA2020_dim.csv')
     empty_coa2021
     empty_hjagrid
     empty_hjamarie
@@ -222,7 +223,8 @@ library(tidyverse)
       nrow(empty_esfground); length(unique(empty_esfground$Filename))
       nrow(empty_esftrail); length(unique(empty_esftrail$Filename))
       nrow(empty_coa2019); length(unique(empty_coa2019$Filename))
-      nrow(empty_coa2020); length(unique(empty_coa2020$Filename))
+      nrow(empty_coa2020); length(unique(empty_coa2020$Filename)) #1 duplicate here; remove it
+        empty_coa2020 <- empty_coa2020[!duplicated(empty_coa2020$Filename),]
       nrow(empty_coa2021); length(unique(empty_coa2021$Filename))
       nrow(empty_hjagrid); length(unique(empty_hjagrid$Filename))
       nrow(empty_hjamarie); length(unique(empty_hjamarie$Filename))
@@ -246,12 +248,6 @@ library(tidyverse)
     empty_coa2019$project <- 'COA_2019'; empty_coa2019$model <- 'trail'
     empty_coa2019$path <- paste('data/', empty_coa2019$project, '/', empty_coa2019$project, '_empty/images/', empty_coa2019$Filename, sep = '')
     
-    empty_coa2020$project <- 'COA_2020'; #empty_coa2020$model <- 'trail' #need to split into ground and trail!
-    empty_coa2020$path <- paste('data/', empty_coa2020$project, '/', empty_coa2020$project, '_empty/images/', empty_coa2020$Filename, sep = '')
-    
-    empty_coa2021$project <- 'COA_2021'; #empty_coa2021$model <- 'trail' #need to split into ground and trail!
-    empty_coa2021$path <- paste('data/', empty_coa2021$project, '/', empty_coa2021$project, '_empty/images/', empty_coa2021$Filename, sep = '')
-    
     empty_hjagrid$project <- 'HJA_GRID'; empty_hjagrid$model <- 'trail'
     empty_hjagrid$path <- paste('data/', empty_hjagrid$project, '/', empty_hjagrid$project, '_empty/images/', empty_hjagrid$Filename, sep = '')
     
@@ -261,9 +257,20 @@ library(tidyverse)
     empty_orsnap$project <- 'ORSNAP'; empty_orsnap$model <- 'trail'
     empty_orsnap$path <- paste('data/', empty_orsnap$project, '/', empty_orsnap$project, '_empty/images/', empty_orsnap$Filename, sep = '')
     
+    #for ones to split between ground/trail:
+    empty_coa2020$project <- 'COA_2020'
+    empty_coa2020$model <- ifelse(grepl('G', empty_coa2020$stn), 'ground', 'trail')
+      table(empty_coa2020$model, useNA = 'a')      
+    empty_coa2020$path <- paste('data/', empty_coa2020$project, '/', empty_coa2020$project, '_empty/images/', empty_coa2020$Filename, sep = '')
+    
+    empty_coa2021$project <- 'COA_2021'; 
+    empty_coa2021$model <- ifelse(grel('G', empty_coa2021$stn), 'ground', 'trail')
+      table(empty_coa2021$model, useNA = 'a')
+    empty_coa2021$path <- paste('data/', empty_coa2021$project, '/', empty_coa2021$project, '_empty/images/', empty_coa2021$Filename, sep = '')
+    
     
     #combine
-    empty_combined <- rbind(empty_dunes, empty_esfbait, empty_esfground, empty_esftrail)
+    empty_combined <- rbind(empty_dunes, empty_esfbait, empty_esfground, empty_esftrail, empty_coa2020, fill = TRUE)
       table(empty_combined$project, empty_combined$model, useNA = 'a')
       table(empty_combined$project, empty_combined$group, useNA = 'a')
       table(empty_combined$model, empty_combined$group, useNA = 'a')
@@ -275,19 +282,21 @@ library(tidyverse)
     demo_val <- read.table('/Volumes/Cara_cam_traps/CV4E/data_cleaned/demo2/demo2_val.txt', col.names = 'path')
     demo_test <- read.table('/Volumes/Cara_cam_traps/CV4E/data_cleaned/demo2/demo2_test.txt', col.names = 'path')
     
-    both_train <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_train.txt', col.names = 'path')
-    both_val <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_val.txt', col.names = 'path')
-    both_test <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_test.txt', col.names = 'path')
+    #demo is done. do the rest when I have all empties curated:
+    both_train <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_train.txt', col.names = 'path')
+    both_val <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_val.txt', col.names = 'path')
+    both_test <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/both_test.txt', col.names = 'path')
     
-    ground_train <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_train.txt', col.names = 'path')
-    ground_val <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_val.txt', col.names = 'path')
-    ground_test <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_test.txt', col.names = 'path')
+    ground_train <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_train.txt', col.names = 'path')
+    ground_val <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_val.txt', col.names = 'path')
+    ground_test <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/ground_test.txt', col.names = 'path')
     
-    trail_train <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_train.txt', col.names = 'path')
-    trail_val <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_val.txt', col.names = 'path')
-    trail_test <- read.table('Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_test.txt', col.names = 'path')
+    trail_train <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_train.txt', col.names = 'path')
+    trail_val <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_val.txt', col.names = 'path')
+    trail_test <- read.table('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/trail_test.txt', col.names = 'path')
 
     #add empties to existing text files
+    set.seed(6)
     
       #demo2
       nrow(demo_train)
@@ -321,6 +330,12 @@ library(tidyverse)
         write.csv(demo2_empties,'/Volumes/Cara_cam_traps/CV4E/data_cleaned/demo2/demo2_empties.csv')
         
         
+        ### NEW, haven't run yet: append these to demo2.csv in metadata_labels?
+        
+        
+      
+      #demo is done. do the rest when all empties are curated:
+        
       #both
       nrow(both_train)
       nrow(both_val)
@@ -347,6 +362,20 @@ library(tidyverse)
       
       
       
-    #save text files  
+    #append to .csv files
+      
+#####
+      
+  ## COA_2020 and others: need to split ground and trail 
+    head(empty_coa2020)
+    empty_coa2020$cam_type <- ifelse(grepl('G', empty_coa2020$stn), 'ground', 'trail')
+      table(empty_coa2020$cam_type, useNA = 'a')      
+      
+      #copy them into respective folders
+      empty_coa2020$current_path <- paste('/Users/caraappel/Documents/CV4E/data/empty_photos/subsets_1000/COA_2020/',
+                                          empty_coa2020$Filename, sep = '')
+      empty_coa2020$destination_path_camtype <- paste('/Users/caraappel/Documents/CV4E/data/empty_photos/subsets_1000/COA_2020/',
+                                                      empty_coa2020$cam_type, '/', empty_coa2020$Filename, sep = '')
+      file.copy(empty_coa2020$current_path, empty_coa2020$destination_path_camtype)
       
       
