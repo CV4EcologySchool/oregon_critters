@@ -46,25 +46,33 @@ library(tidyverse)
 ## SELECT SUBSAMPLE ------------------------------------------------------------
   
   #read in datetimes CSV
-  files <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/datetimes/ESF_TRAIL_NONE_date_created_exif.csv')
+  files <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/datetimes/HJA_MARIE_date_created_exif_BOX.csv')
     head(files)
     nrow(files)
     #if this is less than 1000, just get them all. run this and then skip to the copy and split steps
       # files_sample <- files
     
   #extract site name
-  files <- separate(files, Filename, into = c('site','image'), sep = '_', remove = FALSE)
-    table(files$site, useNA = 'a')
-    files <- files[!files$site == 'IMG',]
+#  files <- separate(files, Filename, into = c('site','image'), sep = '_', remove = FALSE)
+#    table(files$site, useNA = 'a')
+#    files <- files[!files$site == 'IMG',]
     #we can't do anything with the 'IMG' ones so delete them. just make sure there aren't too many
-      
+
+    #For HJA_Marie:
+    files$site <- sapply(strsplit(as.character(files$`Full Path`), '\\/'), '[', 8)
+    files$site <- sapply(strsplit(as.character(files$site), '\\_'), '[', 1)
+    files$site <- sapply(strsplit(as.character(files$site), '\\-'), '[', 2)
+      table(files$site, useNA = 'a')
+      length(unique(files$site)) #this is only 16 out of 94 sites for HJA_Marie
+            
   #get a random sample of ~1000 images, balanced among sites
   set.seed(6)
   sample_size <- 1000  
   (n_groups <- length(unique(files$site)))
   (samples_per_site <- floor(sample_size / n_groups))
   # samples_per_site <- 146 #146 for ESF_TRAIL
-  
+  samples_per_site <- 16 #for HJA_MARIE
+    
     #loop thru
     files_sample <- data.frame()
     for(site in unique(files$site)){
@@ -106,8 +114,15 @@ library(tidyverse)
         
           
   #add destination location and filename
-  destination_dir <- '/Users/caraappel/Documents/CV4E/data/empty_photos/subsets_1000/ESF_TRAIL/'
+  destination_dir <- '/Users/caraappel/Documents/CV4E/data/empty_photos/subsets_1000/HJA_MARIE/'
   files_sample$destination_path <- paste(destination_dir, files_sample$Filename, sep = '/')
+  
+    #HJA_MARIE: prepend site to filename
+    files_sample$destination_path <- paste(destination_dir, '/', files_sample$site, '_', files_sample$Filename, sep = '')
+    
+  #remove duplicates
+  nrow(files_sample); length(unique(files_sample$destination_path))
+  files_sample <- files_sample[!duplicated(files_sample$destination_path),]
     
   #now copy them
   y=0; n=0
@@ -124,6 +139,16 @@ library(tidyverse)
   cat('successfully copied', y, 'files to', destination_dir)
   cat('failed to copy', n, 'files to', destination_dir)
   
+  
+## HJA_MARIE: use datetimes I extracted from both sets (BOX and HD) after copying them
+  hjam <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/datetimes/HJA_MARIE_empties_date_created_exif.csv')
+  hjam$site <- sapply(strsplit(as.character(hjam$Filename), '\\_'), '[', 1)
+    sort(unique(hjam$site)) #47. but should be 65. that means some were dups between BOX and HD
+    table(hjam$site, useNA = 'a')
+      #they should all have ~16, but some have more, so e.g., 134101 must have been in both locations
+    nrow(hjam)
+    length(unique(hjam$Filename)) #but they're all unique, so it's ok. some sites just have more than others.
+  files_sample <- hjam
   
 ## Now split into train/val/test -----------------------------------------------
   ds <- files_sample
@@ -191,7 +216,7 @@ library(tidyverse)
         p1a
         
   ## Save
-    write.csv(ds, '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_esftrail.csv')
+    write.csv(ds, '/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_hjamarie.csv')
  
     ## save txt files with just filenames ... skip, do this below
     # write.table(ds[ds$group %in% 'train',]$full_path, col.names = FALSE, row.names = FALSE,
@@ -214,7 +239,7 @@ library(tidyverse)
     empty_coa2020 <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_COA2020_dim.csv')
     empty_coa2021
     empty_hjagrid
-    empty_hjamarie
+    empty_hjamarie <- fread('/Users/caraappel/Documents/CV4E/oregon_critters/metadata_labels/empty/empty_split_hjamarie_dim.csv')
     empty_orsnap
     
     #make sure all filenames are unique!

@@ -4,13 +4,11 @@
 #make sure dataset_dir has the following structure:
 #/demo2/data: where the images are stored (subfolders are OK)
 #/demo2/labels.json: the json file
-#note the "file_name" field in the "images" directory in labels.json should have paths relative to /demo2/data (e.g., "file_name": "COA_2020/.../images/filename.JPG")
+#note the "file_name" field in the "images" directory in labels.json should have paths relative to /demo2/data/ (e.g., "file_name": "COA_2020/.../images/filename.JPG")
 
 import fiftyone as fo
-import fiftyone.utils.coco as fouc
 
 def main(args):
-    # dataset = fo.Dataset(name=args.dataset)
     dataset_dir = args.dir
     name = args.name
 
@@ -25,7 +23,7 @@ def main(args):
         name = name
     )
 
-    # Add ground truth dataset
+    # Create separate ground truth dataset
     dataset2 = fo.Dataset.from_dir(
         data_path=dataset_dir + 'data/',
         labels_path=dataset_dir + 'labels_gt.json',
@@ -33,15 +31,10 @@ def main(args):
         label_field='ground_truth',
     )
 
+    # Merge the two
     dataset.merge_samples(dataset2)
 
-    # fouc.add_coco_labels(
-    #     dataset,
-    #     labels_or_path="/Volumes/Cara_cam_traps/CV4E/data_cleaned/demo2/labels.json",
-    #     classes='categories',
-    # )
-
-
+    # Launch app
     session = fo.launch_app(dataset)
     session.wait()
 
