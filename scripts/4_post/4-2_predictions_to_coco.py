@@ -143,7 +143,7 @@ if __name__ == "__main__":
     parser.add_argument("--yolo_path", type=str)
     parser.add_argument("--yaml_path", type=str)
     parser.add_argument("--csv_path", type=str)
-    parser.add_argument("--output_dir", type=str)
+    parser.add_argument("--out_dir", type=str)
     args = parser.parse_args()
 
     # Call the main function with the provided arguments
