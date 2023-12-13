@@ -91,13 +91,13 @@ def convert_to_coco(original_json, class_ids, img_metadata):
 
         for image_id, mapped_file_name in image_id_mapping.items():
              if file_name == mapped_file_name:
-                  category_id = category_name_to_id.get(ground_truth_entry.get("species", ""), None)
+                  category_id = category_name_to_id.get(ground_truth_entry.get("CName", ""), None)
 
                   if category_id is not None:
                       coco_data["ground_truth"].append({
                           "id": ground_truth_id_counter,
                           "image_id": image_id,
-                          "name": ground_truth_entry.get("species", ""),
+                          "name": ground_truth_entry.get("CName", ""),
                           "category_id": category_id,
                           "bbox": [float(ground_truth_entry.get('X', 0)), float(ground_truth_entry.get('Y', 0)),
                                    float(ground_truth_entry.get('W', 0)), float(ground_truth_entry.get('H', 0))], #will need to do some math on these
@@ -116,7 +116,7 @@ def main(yolo_path, yaml_path, csv_path, out_dir):
     with open(yaml_path, 'r') as yaml_file:
         yaml_data = yaml.safe_load(yaml_file)
         class_ids = yaml_data.get('names', {})
-    img_metadata = pd.read_csv(csv_path)
+    img_metadata = pd.read_csv(csv_path, low_memory=False) #won't determine column type by first rows (useful for NAs here)
 
     #convert to COCO format
     coco_data = convert_to_coco(yolo_data, class_ids, img_metadata)
