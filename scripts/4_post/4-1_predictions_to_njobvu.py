@@ -47,7 +47,7 @@ def main(yolo_path, yaml_path, csv_path, out_dir):
     with open(yaml_path, 'r') as yaml_file:
         yaml_data = yaml.safe_load(yaml_file)
         class_ids = yaml_data.get('names', {})
-    img_dims = pd.read_csv(csv_path)
+    img_dims = pd.read_csv(csv_path, low_memory=False)
     
     #convert each entry
     converted_json = [convert_entry(entry, class_ids, img_dims) for entry in yolo_data]
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     parser.add_argument("--yolo_path", type=str)
     parser.add_argument("--yaml_path", type=str)
     parser.add_argument("--csv_path", type=str)
-    parser.add_argument("--output_dir", type=str)
+    parser.add_argument("--out_dir", type=str)
     args = parser.parse_args()
 
     # Call the main function with the provided arguments
