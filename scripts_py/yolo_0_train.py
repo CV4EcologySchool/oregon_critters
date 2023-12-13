@@ -10,6 +10,13 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser(description = "Script to train YOLOv8 model using ultralytics")
 
+    #interpret "device" input
+    def parse_device(arg):
+        try:
+            devices = [int(d) for d in arg.split(',')]
+        except ValueError:
+            devices = [int(arg)]
+
     #set required (positional) arguments
     parser.add_argument("data", type=str, help="Path and name of dataset.yaml file")
     parser.add_argument("model", type=str, help="Pretrained model name, e.g., yolov8n.pt")
@@ -20,7 +27,7 @@ def parse_args():
     parser.add_argument("--imgsz", type=int, default=640, help="Image dimensions, e.g., 320 or 640")
     parser.add_argument("--batch", type=int, default=16, help="Batch size, e.g., 16 or 32")
     parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs")
-    parser.add_argument("--device", type=int, default=0, help="Device(s), e.g. 0, [0,1], or cpu")
+    parser.add_argument("--device", type=parse_device, default=[0], help="Device(s), e.g. 0, [0,1], or cpu")
     #parser.add_argument("--single_cls", type=int, default=False, help="To train as single-class, use True")
 
     return parser.parse_args()
@@ -33,14 +40,14 @@ def main():
 
     # Start new wandb run
     wandb.init(entity = 'oregon-critters',
-               project = 'demo_train',
+               project = 'YOLOv8_full',
 	       name = args.name,
                save_code = True,
                job_type = 'train',
 	       config={
-	           #"learning_rate": lr,
                    "batch_size": args.batch,
                    "epochs": args.epochs,
+                   "model": args.model,
                })
 
     # Load pretrained model
