@@ -53,12 +53,12 @@ def main(yolo_path, yaml_path, csv_path, out_dir):
     converted_json = [convert_entry(entry, class_ids, img_dims) for entry in yolo_data]
 
     #save as JSON
-    json_output_path = os.path.join(out_dir, "converted_data.json")
+    json_output_path = os.path.join(out_dir, "labels_for_njobvu.json")
     with open(json_output_path, "w") as json_output_file:
         json.dump(converted_json, json_output_file, indent=2)
 
     #also save as text file
-    text_output_path = os.path.join(out_dir, "converted_data.txt")
+    text_output_path = os.path.join(out_dir, "labels_for_njobvu.txt")
     with open(text_output_path, "w") as text_output_file:
         text_output_file.write(json.dumps(converted_json, indent=2))
 
