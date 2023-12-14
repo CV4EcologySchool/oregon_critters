@@ -5,6 +5,7 @@ import wandb
 import argparse
 import os
 import json
+import pandas as pd
 
 # With argparse:
 def parse_args():
@@ -61,18 +62,30 @@ def main():
     #testing code from UL github to convert results to CSV (issue 2143)
     list = []
     for result in results:
-        boxes =
+            boxes = result.boxes.cpu().numpy()
+            for box in boxes:
+                cls = int(box.cls[0])
+                path = result.path
+                class_name = model.names[cls]
+                conf = int(box.conf[0]*100)
+                bx = box.xywh.tolist()
+                df = pd.DataFrame({'path': path,'class_name': class_name, 'class_id': cls, 'confidence': conf, 'box_coord': bx})
+                list.append(df)
+    df = pd.concat(list)
 
-    print(results_numpy)
+    print(df)
 
     cwd = os.getcwd()
-    output_path = os.path.join(cwd, args.name + "_predictions.json")
+    output_path = os.path.join(cwd, args.name + "_predictions.csv")
+    df.to_csv('predicted_labels.csv', index=False)
+
+#    output_path = os.path.join(cwd, args.name + "_predictions.json")
 
     print("Saved predictions to:")
     print(output_path)
 
-    with open(output_path, "w") as output_file:
-        json.dump(results_json, output_file, indent=2)
+#    with open(output_path, "w") as output_file:
+#        json.dump(results_json, output_file, indent=2)
 
 if __name__ == "__main__":
     main()
