@@ -53,13 +53,7 @@ def main():
     #run predictions
     results = model.predict(image_paths, save=True, save_conf=True, imgsz=args.imgsz, save_txt=True, conf=args.conf, iou=args.iou, device = args.device)
 
-    #save as json
-    #results_json = results[0].tojson()
-    results_json = json.loads(results[0].tojson())    
-
-    results_numpy = results[0].numpy()
-
-    #testing code from UL github to convert results to CSV (issue 2143)
+    #convert results to dataframe (code from lonnylundsten on github.com/ultralytics/ultralytics/issues/2143)
     list = []
     for result in results:
             boxes = result.boxes.cpu().numpy()
@@ -73,19 +67,13 @@ def main():
                 list.append(df)
     df = pd.concat(list)
 
-    print(df)
-
+    #save as CSV
     cwd = os.getcwd()
     output_path = os.path.join(cwd, args.name + "_predictions.csv")
-    df.to_csv('predicted_labels.csv', index=False)
-
-#    output_path = os.path.join(cwd, args.name + "_predictions.json")
+    df.to_csv(output_path, index=False)
 
     print("Saved predictions to:")
     print(output_path)
-
-#    with open(output_path, "w") as output_file:
-#        json.dump(results_json, output_file, indent=2)
 
 if __name__ == "__main__":
     main()
