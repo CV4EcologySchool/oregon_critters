@@ -1,7 +1,7 @@
 # Run predictions from trained YOLO model
 
 from ultralytics import YOLO
-import wandb
+#import wandb
 import argparse
 import os
 import json
@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument("--imgsz", type=int, default=640, help="Image dimensions, e.g., 320 or 640")
     parser.add_argument("--conf", type=int, default=0.1, help="Confidence threshold")
     parser.add_argument("--iou", type=int, default=0.7, help="IOU threshold for bboxes")
-    parser.add_argument("--device", type=int, default=0, help="Device(s), e.g., 0 or cpu")
+    #parser.add_argument("--device", type=int, default=0, help="Device(s), e.g., 0 or cpu")
 
     return parser.parse_args()
 
@@ -32,26 +32,35 @@ def main():
     args = parse_args()
 
     #start wandb run
-    wandb.init(entity = 'oregon-critters', 
-	       project = 'YOLOv8_full',
-               name = args.name,
-               save_code = True,
-               job_type = 'pred',
-               config={
-                       "conf": args.conf,
-                       "iou": args.iou,
-                       "model": args.model,
-                   })
+    # wandb.init(entity = 'oregon-critters', 
+	#        project = 'YOLO_full',
+    #            name = args.name,
+    #            save_code = True,
+    #            job_type = 'pred',
+    #            config={
+    #                    "conf": args.conf,
+    #                    "iou": args.iou,
+    #                    "model": args.model,
+    #                })
 
     #load my trained model
     model = YOLO(args.model) #e.g., runs/detect/7_mc_ground_med/weights/best.pt
 
     #import images
-    with open(args.image_list, 'r') as f:
-        image_paths = f.read().splitlines()
+    # with open(args.image_list, 'r') as f:
+    #     image_paths = f.read().splitlines()
 
     #run predictions
-    results = model.predict(image_paths, save=True, save_conf=True, imgsz=args.imgsz, save_txt=True, conf=args.conf, iou=args.iou, device = args.device)
+    results = model.predict(args.image_list,
+                            #image_paths, 
+                            stream=True, 
+                            save=True, 
+                            save_conf=True, 
+                            imgsz=args.imgsz, 
+                            save_txt=True, 
+                            conf=args.conf, 
+                            iou=args.iou, 
+                            device = 'cpu')
 
     #convert results to dataframe (code from lonnylundsten on github.com/ultralytics/ultralytics/issues/2143)
     list = []
