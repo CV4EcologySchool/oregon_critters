@@ -70,9 +70,9 @@ def calculate_iou(x1, y1, w1, h1, x2, y2, w2, h2):
 
 
 #define function to compare predicted boxes and ground truth
-def compare_boxes(pred_data, gt_data):
+def compare_boxes(pred_data, gt_data, iou_thresh):
     
-    thresh = 0.5 #set IoU threshold for matches
+    thresh = iou_thresh #set IoU threshold for matches
     results_list = [] #initialize list to store results
 
     #iterate over predicted boxes 
@@ -116,7 +116,7 @@ def compare_boxes(pred_data, gt_data):
 
 
 # define main 
-def main(preds_csv, groundtruth_csv, out_dir):
+def main(preds_csv, groundtruth_csv, out_dir, iou_thresh):
 
     #load ground truth labels and format them
     gt_labels = pd.read_csv(groundtruth_csv, low_memory=False)
@@ -127,7 +127,7 @@ def main(preds_csv, groundtruth_csv, out_dir):
     pred_labels = format_preds(pred_labels)
     
     #compare true and predicted boxes for overlap
-    label_matches = compare_boxes(pred_labels, gt_labels)
+    label_matches = compare_boxes(pred_labels, gt_labels, iou_thresh)
 
     #now compare for class matches
     label_matches['class_match'] = label_matches['pred_class'] == label_matches['true_class']
@@ -154,10 +154,11 @@ def main(preds_csv, groundtruth_csv, out_dir):
 # run main
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate YOLOv8 model on 'test' set")
-    parser.add_argument("--preds_csv", type=str, help="Path to predictions output, e.g. 'pred_both35_both_predictions.csv")
-    parser.add_argument("--groundtruth_csv", type=str, help="Path to ground truth labels, e.g. 'both.csv'")
-    parser.add_argument("--out_dir", type=str)
+    parser.add_argument("preds_csv", type=str, help="Path to predictions output, e.g. 'pred_both35_both_predictions.csv")
+    parser.add_argument("groundtruth_csv", type=str, help="Path to ground truth labels, e.g. 'both.csv'")
+    parser.add_argument("--out_dir", type=str, default='.',help='Desired directory for outputs')
+    parser.add_argument("--iou_thresh", type=int, default=0.5, help='IOU threshold to consider overlap')
     args = parser.parse_args()
 
     # Call the main function with the provided arguments
-    main(args.preds_csv, args.groundtruth_csv, args.out_dir)
+    main(args.preds_csv, args.groundtruth_csv, args.out_dir, args.iou_thresh)
