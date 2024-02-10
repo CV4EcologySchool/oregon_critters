@@ -68,7 +68,7 @@ def main():
 	       project = 'COA_predictions',
                name = args.name,
                save_code = True,
-               job_type = 'val')
+               job_type = 'pred')
     
     #load the trained model (.pt file)
     model = YOLO(args.model)
@@ -98,7 +98,10 @@ def main():
                             device=args.device)
 
     #convert results to dataframe (code from lonnylundsten on github.com/ultralytics/ultralytics/issues/2143)
-    list = []
+    csv_output = "predictions.csv"
+    csv_output_path = generate_preds_filename(csv_output) #if 'predictions.csv' exists, create a new filename
+
+    # list = []
     for result in results:
             boxes = result.boxes.cpu().numpy()
             for box in boxes:
@@ -108,22 +111,25 @@ def main():
                 conf = int(box.conf[0]*100)
                 bx = box.xywh.tolist()
                 df = pd.DataFrame({'path': path,'class_name': class_name, 'class_id': cls, 'confidence': conf, 'box_coord': bx})
-                list.append(df)
-    results_df = pd.concat(list) 
+                # list.append(df)
+                with open(csv_output,'a') as outfile:
+                 outfile.write(df + "\n")
+ 
+    # results_df = pd.concat(list) 
 
     #add empty images to dataframe:
 
-    #turn empties onto a df
-    empty_df = pd.DataFrame({'path': filepaths, 'class_name': 'empty', 'class_id': None, 'confidence': None, 'box_coord': None}, index=filepaths)
-    #find only the ones not already in results df
-    filtered_empties = empty_df[~empty_df['path'].isin(results_df['path'])]
-    #now add those to results_df
-    df = pd.concat([results_df, filtered_empties], ignore_index=True, sort=False)
+    # #turn empties onto a df
+    # empty_df = pd.DataFrame({'path': filepaths, 'class_name': 'empty', 'class_id': None, 'confidence': None, 'box_coord': None}, index=filepaths)
+    # #find only the ones not already in results df
+    # filtered_empties = empty_df[~empty_df['path'].isin(results_df['path'])]
+    # #now add those to results_df
+    # df = pd.concat([results_df, filtered_empties], ignore_index=True, sort=False)
 
     #save predictions as CSV
-    csv_output = "predictions.csv"
-    csv_output_path = generate_preds_filename(csv_output) #if 'predictions.csv' exists, create a new filename
-    df.to_csv(csv_output_path, index=False)
+    # csv_output = "predictions.csv"
+    # csv_output_path = generate_preds_filename(csv_output) #if 'predictions.csv' exists, create a new filename
+    # df.to_csv(csv_output_path, index=False)
 
     print(f"Saved predictions to {csv_output_path} in current directory")
 
