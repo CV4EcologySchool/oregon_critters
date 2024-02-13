@@ -122,16 +122,18 @@ def convert_to_coco(preds_labels, class_ids):
     for pred_index, pred_row in preds_labels.iterrows():
 
         # Extract image dimensions and datetime
-        dimensions = get_image_dimensions(pred_row.path)
-        #birthtime = get_birthtime(pred_row.path)
+        # dimensions = get_image_dimensions(pred_row.path)
+        # birthtime = get_birthtime(pred_row.path)
 
         # Add image info (first check if it has been added already)
         if pred_row['image_name'] not in unique_image_ids:
             coco_data["images"].append({
                 "id": image_id_counter,
                 "file_name": pred_row.path.split('data/')[1],
-                "width": int(dimensions[0]),
-                "height": int(dimensions[1]),
+                "width": pred_row['img_width'],
+                "height": pred_row['img_height'],
+                # "width": int(dimensions[0]),
+                # "height": int(dimensions[1]),
                 #"date_captured": str(birthtime),
             })
 
@@ -204,25 +206,34 @@ def main():
     if os.path.exists('classes.csv'):
         class_ids = pd.read_csv('classes.csv', header=None, names=['class_name'])
         class_ids['class_id'] = range(len(class_ids))
+        print('Found classes.csv')
     else:
         print('classes.csv not found')
 
     #locate results text files based on run name argument
+    print(f"Looking for text files in results/{args.name}...")
     results_dir = os.path.join('results/', args.name)
 
     #load results text files and format them
     preds = parse_text_files(results_dir)
 
+    print("Finished parsing text files.")
+    print("Creating CSV...")
+
     ## Format predictions and save as CSV
     pred_labels = convert_to_csv(preds, args.image_list, class_ids)
     csv_output_path = os.path.join(results_dir, 'predictions.csv')
     pred_labels.to_csv(csv_output_path)
+
+    print("Converting to JSON...")
     
     ## Convert to COCO format and save as JSON
     coco_data = convert_to_coco(pred_labels, class_ids)
     coco_output_path = os.path.join(results_dir, "labels.json")
     with open(coco_output_path, "w") as coco_output_file:
         json.dump(coco_data, coco_output_file, indent=4)
+
+    print("Converting to Njobvu-AI input...")
 
     ## Convert to NJOBVU format and save as TXT
     yolo_data = pred_labels
@@ -244,6 +255,8 @@ def main():
     # with open(json_output_path, 'w') as json_file:
     #     json.dump(dict_entries, json_file)
 
+    print("")
+    print("Done!")
     print("Predictions saved to:")
     print(csv_output_path) 
     print(coco_output_path)
