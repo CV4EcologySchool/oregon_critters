@@ -85,7 +85,7 @@ def createProject(projectName, labels_path, class_list, image_dir, tool_path):
         f = open(labels_path)
         data = json.load(f)
     else:
-        print('labels_for_njobvu.txt not found')        
+        print(f'labels_for_njobvu.txt not found. Looking in:{labels_path}')
 
     labelID = 0
     for line in data:
@@ -93,24 +93,28 @@ def createProject(projectName, labels_path, class_list, image_dir, tool_path):
             #height = 1440
             #width = 1920
             for obj in line['objects']:
-                img_width = obj['image_width']
-                img_height = obj['image_height']
+                # img_width = obj['image_width']
+                # img_height = obj['image_height']
                 rc = obj['relative_coordinates']
-                label_width = img_width * rc['width']
-                label_height = img_height * rc['height']
-                left_x = rc['center_x'] * img_width - (label_width / 2)
-                bottom_y = rc['center_y'] * img_height - (label_height / 2)
+                label_width = rc['width']
+                label_height = rc['height']
+                left_x = rc['topleft_x']
+                bottom_y = rc['topleft_y']
+                # label_width = img_width * rc['width']
+                # label_height = img_height * rc['height']
+                # left_x = rc['center_x'] * img_width - (label_width / 2)
+                # bottom_y = rc['center_y'] * img_height - (label_height / 2)
                 class_name = obj['name']
                 labelID += 1
                 filename = line['filename'].split('/')[-1]
-                confidence = (float(obj['confidence'])) #removed * 100
+                confidence = (float(obj['confidence'])*100) #removed * 100
 
                 write.execute("INSERT INTO Labels (LID, CName, X, Y, W, H, IName) VALUES ('"+str(labelID)+"', '" + str(class_name) + "', '" + str(left_x) + "', '" + str(bottom_y) + "', '" + str(label_width) + "', '" + str(label_height) + "', '" + str(filename) + "')")
                 write.execute("INSERT INTO Validation (Confidence, LID, CName, IName) VALUES ('" + str(confidence) + "', '" + str(labelID) +  "', '" + str(class_name) + "', '" + str(filename) + "')")
                 # write.execute()
     f.close()
 
-    print(os.listdir(folderPath))
+    # print(os.listdir(folderPath))
 
     #db and folder image insertion (this is for no nested subfolders b/c we handled that in 'main')
     for image in sorted(os.listdir(folderPath), key=custom_sort):
@@ -153,13 +157,15 @@ def createProject(projectName, labels_path, class_list, image_dir, tool_path):
 
 
 ## Define main                
-def main(tool_path, project_name, image_dir, labels_file):
+def main(tool_path, project_name, image_dir):
 
     #load classes (looks for classes.csv in current directory)
     classes = 'classes.csv'
 
-    #load labels (looks for labels_for_njobvu.txt in current directory -- this is the default in args but can be modified)
-    labels_path = labels_file
+    #load labels (looks for labels_for_njobvu.txt in the specified directory -- this is the default in args but can be modified)
+    results_dir = os.path.join('results/', args.name)
+    labels_path = results_dir + '/labels_for_njobvu.txt'
+    # labels_path = labels_file
 
     #See if there are multiple sites (subfolders) and if so, create a project for each
     #Could also include an argument, e.g., keepSubProjects=True
@@ -180,11 +186,12 @@ def main(tool_path, project_name, image_dir, labels_file):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create Njobvu-AI project with classified images")
     parser.add_argument("tool_path", type=str, help='Path to main labeling tool folder')
+    parser.add_argument("name", type=str, help='Name of project (name of folder in /results/)')
     parser.add_argument("project_name", type=str, help='Desired name of project')
     parser.add_argument("username", type=str, help="Your Njobvu-AI username")
-    parser.add_argument("--image_dir", type=str, default='data/', help="Directory of image locations (relative to paths in labels_txt)")
-    parser.add_argument("--labels_file", type=str, default='labels_for_njobvu.txt', help='Path to "labels_for_njobvu.txt" file')
+    parser.add_argument("--image_dir", type=str, default='data/', help="Directory of image locations (relative to paths in labels_for_njobvu.txt)")
+    # parser.add_argument("--labels_file", type=str, default='labels_for_njobvu.txt', help='Path to "labels_for_njobvu.txt" file')
     args = parser.parse_args()
 
     # Call the main function with the provided arguments
-    main(args.tool_path, args.project_name, args.image_dir, args.labels_file)
+    main(args.tool_path, args.project_name, args.image_dir)

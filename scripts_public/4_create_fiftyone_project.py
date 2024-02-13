@@ -1,40 +1,32 @@
 ## Script to create a FiftyOne dataset from YOLO predictions using a JSON file
 
-#you do not need to be in the dataset_dir to run this script
-#make sure dataset_dir has the following structure:
-#/demo2/data: where the images are stored (subfolders are OK)
-#/demo2/labels.json: the json file
-#note the "file_name" field in the "images" directory in labels.json should have paths relative to /demo2/data/ (e.g., "file_name": "COA_2020/.../images/filename.JPG")
+#this script relies on the following folder structure:
+# /data: where images are stored (subfolders OK)
+# /scripts: where this script is
+# /results/name/labels/labels.json: file with predictions
 
-#example usage: python3 4-3_coco_to_fiftyone.py --dir both/ --name both_test_2
+#example usage: python3 scripts/4_create_fiftyone_project.py run1 run1_dataset
 
 import fiftyone as fo
+import os
 
 def main(args):
-    dataset_dir = args.dir
-    name = args.name
-
-    #name = 'demo2_test_full6'
-    #dataset_dir = '/Volumes/Cara_cam_traps/CV4E/data_cleaned/demo2/'
-
+    name=args.name
+    datapath = os.path.join(args.dir, 'data/')
+    labelspath = os.path.join(args.dir, 'results/', args.name, 'labels.json')
+ 
+    print(f"Looking for images in {datapath}")
+    print(f"Looking for labels in {labelspath}")
+    print(f"Creating FiftyOne dataset named {name}")
+  
     # Create the dataset
     dataset = fo.Dataset.from_dir(
-        dataset_dir=dataset_dir,
+        data_path=datapath,
+        labels_path=labelspath,
         dataset_type=fo.types.COCODetectionDataset,
         label_field='predictions', #this is what to call it, not what it's called in the JSON
         name = name
     )
-
-    # Create separate ground truth dataset
-    dataset2 = fo.Dataset.from_dir(
-        data_path=dataset_dir + 'data/',
-        labels_path=dataset_dir + 'labels_gt.json',
-        dataset_type=fo.types.COCODetectionDataset,
-        label_field='ground_truth',
-    )
-
-    # Merge the two
-    dataset.merge_samples(dataset2)
 
     # Launch app
     session = fo.launch_app(dataset)
@@ -43,7 +35,8 @@ def main(args):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument("name", type=str, help='Name of project (name of folder in /results/)')
     parser.add_argument("--dir", type=str, default='', help='Directory location, e.g. both/ or .')
-    parser.add_argument("--name", type=str, default="test_dataset", help='Name for FiftyOne dataset')
+    parser.add_argument("project_name", type=str, default="test_dataset", help='Name for FiftyOne dataset')
     args = parser.parse_args()
     main(args)
